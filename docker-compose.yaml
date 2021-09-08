@@ -1,0 +1,30 @@
+version: '3.5'
+
+networks:
+  backend:
+    driver: bridge
+
+services:
+    api:
+      depends_on: 
+        - mysql
+      build:
+        context: .
+      ports:
+        - "8080:8080"
+      networks:
+        - backend
+      environment: 
+        - MW_TEST_SERVER_HOST=0.0.0.0
+        - MW_TEST_DB_HOST=mysql
+    mysql:
+      image: mysql:latest
+      ports:
+        - "3306:3306"
+      networks:
+        - backend
+      environment: 
+        - MYSQL_ROOT_PASSWORD=root
+        - MYSQL_DATABASE=backend
+        - MYSQL_USER=backend
+        - MYSQL_PASSWORD=backend
