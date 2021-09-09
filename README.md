@@ -1,28 +1,31 @@
-# Jamtangan.com Backend Test
+# Kuncie Backend Test
 
-***Constraint and Requirement***
-- One brand can have many/multiple products
-- One product will have exactly one brand
-- Every product have a “price” field/property
-- Customer will be able to make a transaction/order
-- Customer can see the transaction detail
-- You can be as creative as you can for those database table fields.
-- You can use CLI migration tool for your SQL schema, Eg:
-https://github.com/golang-migrate/migrate
-https://github.com/pressly/goose
-- Do not use third party library for Multiplexer or router, only use “net/http” standard library, hint: https://golang.org/pkg/net/http/#NewServeMux
-- Do not use ORM, you can use any sql driver
-- You can use any third party library for testing (unit test or integration test)
-- You can use third party library to validate input from client side/user input
-- It is up to you to decide which parameters are required and which parameter is optional
-for each endpoint.
-- No authentication required
-- Please put your assumptions and how to in a README.md
+## BE Candidate Take Home Test
+
+Have you shopped online? Let’s imagine that you need to build the checkout backend service that will support different promotions with the given inventory.
+Build a checkout system with these items:
+
+| SKU | Name | Price | Qty |
+|-----|------|-------|-----|
+| 123 |Google Home|$49.99|10|
+| 234 |Macbook Pro|$5,399.99|5|
+| 456 |Alexa Speaker|$109.50|10|
+| 984 |Raspi B|$30.00|2|
+
+The system should have the following promotions:
+- Each sale of a MacBook Pro comes with a free Raspberry Pi B
+- Buy 3 Google Homes for the price of 2
+- Buying more than 3 Alexa Speakers will have a 10% discount on all Alexa speakers
+
+Example Scenarios:
+- Scanned Items: MacBook Pro, Raspberry Pi B Total: $5,399.99
+- Scanned Items: Google Home, Google Home, Google Home Total: $99.98
+- Scanned Items: Alexa Speaker, Alexa Speaker, Alexa Speaker Total: $295.65
 
 ***Task***
-1. Create Database Schema using RDBMS based on Constraint and Requirements above
-2. Create Web API service (JSON API) with Go/Golang based on Constraint and
-Requirements above with these functionalities:
+1. Please write it in Golang or Node with a CI script that runs tests and produces a binary.
+2. Finally, imagine that adding items to cart and checking out was a backend API. Please design a schema file for GraphQL on how you would do this.
+3. Thank you for your time and we look forward to reviewing your solution. If you have any questions, please feel free to contact us. Please send us a link to your git repo.
 
 # Solution
 
