@@ -144,12 +144,39 @@ func createTransaction(p graphql.ResolveParams) (interface{}, error) {
 	trans.TransactionDetail = td
 
 	//TODO return transaction record
-	_, err = TransactionRepo.CreateTransaction(p.Context, trans)
+	tID, err := TransactionRepo.CreateTransaction(p.Context, trans)
 	if err != nil {
 		return graphql.Interface{}, err
 	}
 
-	var o types.Order
+	trans, err = TransactionRepo.GetTransactionByTransactionID(p.Context, tID)
+	if err != nil {
+		return graphql.Interface{}, err
+	}
+
+	var oDetail []types.OrderDetail
+	for i := 0; i < len(trans.TransactionDetail); i++ {
+		detail := trans.TransactionDetail[i]
+
+		d := types.OrderDetail{
+			TransactionID: detail.TransactionID,
+			ProductID:     detail.ProductID,
+			SKU:           detail.SKU,
+			Qty:           detail.Qty,
+			SubTotal:      detail.SubTotal,
+		}
+
+		oDetail = append(oDetail, d)
+	}
+
+	o := types.Order{
+		ID:          trans.ID,
+		UserID:      trans.UserID,
+		GrandTotal:  trans.GrandTotal,
+		OrderDetail: oDetail,
+		Discount:    trans.Discount,
+		Reason:      trans.Reason,
+	}
 
 	return o, nil
 }

@@ -373,14 +373,21 @@ func TestGetTransactionByTransactionID(t *testing.T) {
 
 	t.Run("success", func(t *testing.T) {
 		db, mock, err := sqlmock.New()
-		rows := sqlmock.NewRows([]string{"id", "user_id", "date", "grand_total"}).
-			AddRow(1, 1, time.Now(), 1000)
+		rows := sqlmock.NewRows([]string{"id", "user_id", "date", "grand_total", "discount", "reason"}).
+			AddRow(1, 1, time.Now(), 1000, 0, "test")
 
 		mock.ExpectQuery("SELECT (.+) FROM transactions").WillReturnRows(rows)
 
 		if err != nil {
 			t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
 		}
+
+		rows = sqlmock.NewRows([]string{"transaction_id", "product_id", "price", "qty", "sub_total", "sku"}).
+			AddRow(1, 1, 100, 1, 1000, "123").
+			AddRow(1, 2, 100, 1, 1000, "123").
+			AddRow(1, 2, 100, 1, 1000, "123")
+
+		mock.ExpectQuery("SELECT (.+) FROM transaction_detail").WillReturnRows(rows)
 
 		defer db.Close()
 		// inject sqlmock.DB into MySQLDB
@@ -440,15 +447,15 @@ func TestGetTransactionDetailByTransactionID(t *testing.T) {
 
 	t.Run("success", func(t *testing.T) {
 		db, mock, err := sqlmock.New()
-		rows := sqlmock.NewRows([]string{"id", "user_id", "date", "grand_total"}).
-			AddRow(1, 1, time.Now(), 1000)
+		rows := sqlmock.NewRows([]string{"id", "user_id", "date", "grand_total", "discount", "reason"}).
+			AddRow(1, 1, time.Now(), 1000, 0, "test")
 
 		mock.ExpectQuery("SELECT (.+) FROM transactions").WillReturnRows(rows)
 
-		rows = sqlmock.NewRows([]string{"transaction_id", "product_id", "price", "qty", "sub_total"}).
-			AddRow(1, 1, 100, 1, 1000).
-			AddRow(1, 2, 100, 1, 1000).
-			AddRow(1, 2, 100, 1, 1000)
+		rows = sqlmock.NewRows([]string{"transaction_id", "product_id", "price", "qty", "sub_total", "sku"}).
+			AddRow(1, 1, 100, 1, 1000, "123").
+			AddRow(1, 2, 100, 1, 1000, "123").
+			AddRow(1, 2, 100, 1, 1000, "123")
 
 		mock.ExpectQuery("SELECT (.+) FROM transaction_detail").WillReturnRows(rows)
 

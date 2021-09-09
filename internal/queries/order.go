@@ -45,6 +45,8 @@ func getTransaction(p graphql.ResolveParams) (interface{}, error) {
 		UserID:      trans.UserID,
 		GrandTotal:  trans.GrandTotal,
 		OrderDetail: oDetail,
+		Discount:    trans.Discount,
+		Reason:      trans.Reason,
 	}
 
 	return o, nil

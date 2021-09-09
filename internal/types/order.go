@@ -8,6 +8,8 @@ type Order struct {
 	ID          int           `json:"id"`
 	UserID      int           `json:"user_id"`
 	GrandTotal  int           `json:"grand_total"`
+	Discount    int           `json:"discount"`
+	Reason      string        `json:"reason"`
 	OrderDetail []OrderDetail `json:"detail_order"`
 }
 
@@ -36,6 +38,8 @@ var OrderType = graphql.NewObject(graphql.ObjectConfig{
 		"id":          &graphql.Field{Type: graphql.Int},
 		"user_id":     &graphql.Field{Type: graphql.Int},
 		"grand_total": &graphql.Field{Type: graphql.Int},
+		"discount":    &graphql.Field{Type: graphql.Int},
+		"reason":      &graphql.Field{Type: graphql.String},
 		"detail_order": &graphql.Field{
 			Type: graphql.NewList(DetailType),
 			Resolve: func(p graphql.ResolveParams) (interface{}, error) {

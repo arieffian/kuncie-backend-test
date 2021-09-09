@@ -57,9 +57,9 @@ func (m *MockDBType) GetTransactionDetailByTransactionID(ctx context.Context, tr
 }
 
 // CreateTransaction insert an entity record of transaction into database.
-func (m *MockDBType) CreateTransaction(ctx context.Context, rec *TransactionRecord) (string, error) {
+func (m *MockDBType) CreateTransaction(ctx context.Context, rec *TransactionRecord) (int, error) {
 	args := m.Called(ctx, rec)
-	return args.String(0), args.Error(1)
+	return args.Int(0), args.Error(1)
 }
 
 // GetUserByID retrieves an UserRecord from database where the user id is specified.

@@ -122,14 +122,14 @@ func (db *MySQLDB) GetTransactionByTransactionID(ctx context.Context, transactio
 	fLog := mysqlLog.WithField("func", "GetTransactionByTransactionID")
 	transaction := &TransactionRecord{}
 
-	row := db.instance.QueryRowContext(ctx, "SELECT id, user_id, date, grand_total FROM transactions WHERE id = ?", transactionID)
-	err := row.Scan(&transaction.ID, &transaction.UserID, &transaction.Date, &transaction.GrandTotal)
+	row := db.instance.QueryRowContext(ctx, "SELECT id, user_id, date, grand_total, discount, reason FROM transactions WHERE id = ?", transactionID)
+	err := row.Scan(&transaction.ID, &transaction.UserID, &transaction.Date, &transaction.GrandTotal, &transaction.Discount, &transaction.Reason)
 	if err != nil {
 		fLog.Errorf("row.Scan got %s", err.Error())
 		return nil, err
 	}
 
-	q := fmt.Sprintf("SELECT transaction_id, product_id, qty, sub_total, sku FROM transaction_detail WHERE transaction_id = %v", transactionID)
+	q := fmt.Sprintf("SELECT td.transaction_id, td.product_id, td.qty, td.sub_total, p.sku FROM transaction_detail td INNER JOIN products p ON td.product_id = p.id WHERE transaction_id = %v", transactionID)
 	rows, err := db.instance.QueryContext(ctx, q)
 	if err != nil {
 		fLog.Errorf("db.instance.QueryContext got %s", err.Error())
@@ -164,7 +164,7 @@ func (db *MySQLDB) GetTransactionDetailByTransactionID(ctx context.Context, tran
 		return nil, err
 	}
 
-	q := fmt.Sprintf("SELECT transaction_id, product_id, qty, sub_total FROM transaction_detail WHERE transaction_id = %v", transactionID)
+	q := fmt.Sprintf("SELECT td.transaction_id, td.product_id, td.qty, td.sub_total, p.sku FROM transaction_detail td INNER JOIN products p ON td.product_id = p.id WHERE transaction_id = %v", transactionID)
 	rows, err := db.instance.QueryContext(ctx, q)
 	if err != nil {
 		fLog.Errorf("db.instance.QueryContext got %s", err.Error())
@@ -174,7 +174,7 @@ func (db *MySQLDB) GetTransactionDetailByTransactionID(ctx context.Context, tran
 	tDetail := make([]*TransactionDetailRecord, 0)
 	for rows.Next() {
 		tD := &TransactionDetailRecord{}
-		err := rows.Scan(&tD.TransactionID, &tD.ProductID, &tD.Qty, &tD.SubTotal)
+		err := rows.Scan(&tD.TransactionID, &tD.ProductID, &tD.Qty, &tD.SubTotal, tD.SKU)
 		if err != nil {
 			fLog.Errorf("rows.Scan got %s", err.Error())
 		} else {
@@ -186,14 +186,14 @@ func (db *MySQLDB) GetTransactionDetailByTransactionID(ctx context.Context, tran
 }
 
 // CreateTransaction insert an entity record of transaction into database.
-func (db *MySQLDB) CreateTransaction(ctx context.Context, rec *TransactionRecord) (string, error) {
+func (db *MySQLDB) CreateTransaction(ctx context.Context, rec *TransactionRecord) (int, error) {
 	fLog := mysqlLog.WithField("func", "CreateTransaction")
 
 	// start db transaction
 	tx, err := db.instance.BeginTx(ctx, nil)
 	if err != nil {
 		fLog.Errorf("db.instance.BeginTx got %s", err.Error())
-		return "", err
+		return 0, err
 	}
 
 	// create transaction record
@@ -203,9 +203,9 @@ func (db *MySQLDB) CreateTransaction(ctx context.Context, rec *TransactionRecord
 		errRollback := tx.Rollback()
 		if errRollback != nil {
 			fLog.Errorf("error rollback, got %s", err.Error())
-			return "", errRollback
+			return 0, errRollback
 		}
-		return "", err
+		return 0, err
 	}
 
 	tID, err := trans.LastInsertId()
@@ -214,9 +214,9 @@ func (db *MySQLDB) CreateTransaction(ctx context.Context, rec *TransactionRecord
 		errRollback := tx.Rollback()
 		if errRollback != nil {
 			fLog.Errorf("error rollback, got %s", err.Error())
-			return "", errRollback
+			return 0, errRollback
 		}
-		return "", err
+		return 0, err
 	}
 
 	grandTotal := 0
@@ -232,9 +232,9 @@ func (db *MySQLDB) CreateTransaction(ctx context.Context, rec *TransactionRecord
 			errRollback := tx.Rollback()
 			if errRollback != nil {
 				fLog.Errorf("error rollback, got %s", err.Error())
-				return "", errRollback
+				return 0, errRollback
 			}
-			return "", err
+			return 0, err
 		}
 
 		//check qty
@@ -243,9 +243,9 @@ func (db *MySQLDB) CreateTransaction(ctx context.Context, rec *TransactionRecord
 			errRollback := tx.Rollback()
 			if errRollback != nil {
 				fLog.Errorf("error rollback, got %s", err.Error())
-				return "", errRollback
+				return 0, errRollback
 			}
-			return "", fmt.Errorf("product qty is not enough")
+			return 0, fmt.Errorf("product qty is not enough")
 		}
 
 		qty := p.Qty - detail.Qty
@@ -259,9 +259,9 @@ func (db *MySQLDB) CreateTransaction(ctx context.Context, rec *TransactionRecord
 			errRollback := tx.Rollback()
 			if errRollback != nil {
 				fLog.Errorf("error rollback, got %s", err.Error())
-				return "", errRollback
+				return 0, errRollback
 			}
-			return "", err
+			return 0, err
 		}
 
 		//insert transaction detail
@@ -271,9 +271,9 @@ func (db *MySQLDB) CreateTransaction(ctx context.Context, rec *TransactionRecord
 			errRollback := tx.Rollback()
 			if errRollback != nil {
 				fLog.Errorf("error rollback, got %s", err.Error())
-				return "", errRollback
+				return 0, errRollback
 			}
-			return "", err
+			return 0, err
 		}
 	}
 
@@ -286,9 +286,9 @@ func (db *MySQLDB) CreateTransaction(ctx context.Context, rec *TransactionRecord
 		errRollback := tx.Rollback()
 		if errRollback != nil {
 			fLog.Errorf("error rollback, got %s", err.Error())
-			return "", errRollback
+			return 0, errRollback
 		}
-		return "", err
+		return 0, err
 	}
 
 	// commit transaction
@@ -298,12 +298,12 @@ func (db *MySQLDB) CreateTransaction(ctx context.Context, rec *TransactionRecord
 		errRollback := tx.Rollback()
 		if errRollback != nil {
 			fLog.Errorf("error rollback, got %s", err.Error())
-			return "", errRollback
+			return 0, errRollback
 		}
-		return "", err
+		return 0, err
 	}
 
-	return "transaction created successfully", nil
+	return int(tID), nil
 }
 
 // GetUserByID retrieves an UserRecord from database where the user id is specified.

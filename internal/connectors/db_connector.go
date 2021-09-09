@@ -84,7 +84,7 @@ type ProductRepository interface {
 
 type TransactionRepository interface {
 	// CreateTransaction insert an entity record of transaction into database.
-	CreateTransaction(ctx context.Context, rec *TransactionRecord) (string, error)
+	CreateTransaction(ctx context.Context, rec *TransactionRecord) (int, error)
 
 	// GetTransactionByTransactionID retrieves the detail of a transaction from database where the transaction id is specified.
 	GetTransactionByTransactionID(ctx context.Context, transactionID int) (*TransactionRecord, error)
