@@ -3,7 +3,7 @@ rule FreeRasPi "Free RasPi when purchasing MacBook Pro" salience 10 {
         Ft.IsExist(1) && Ft.IsExist(4)
     then
         Ft.Discount=Ft.Discount + Ft.Product[Ft.GetProductIndex(4)].Price;
-        Ft.Reason=Ft.Reason + "Free RasPi when purchasing MacBook Pro ";
+        Ft.Reason=Ft.Reason + "Free RasPi when purchasing MacBook Pro, ";
         Retract("FreeRasPi");
 }
 
@@ -12,7 +12,7 @@ rule GoogleHomeBuy2Get3 "Free 1 Google Home when buying 2 Google Homes" salience
         Ft.IsExist(2) && Ft.GetQty(2) == 3
     then
         Ft.Discount=Ft.Discount + Ft.Product[Ft.GetProductIndex(2)].Price;
-        Ft.Reason=Ft.Reason + "Free 1 Google Home when buying 2 Google Homes ";
+        Ft.Reason=Ft.Reason + "Free 1 Google Home when buying 2 Google Homes, ";
         Retract("GoogleHomeBuy2Get3");
 }
 
@@ -21,6 +21,6 @@ rule AlexaDiscount10Percent "10 percent discount when buying 3 Alexa speakers" s
         Ft.IsExist(3) && Ft.GetQty(3) == 3
     then
         Ft.Discount=Ft.Discount + (Ft.Product[Ft.GetProductIndex(3)].Price * Ft.Product[Ft.GetProductIndex(3)].Qty * 0.1);
-        Ft.Reason=Ft.Reason + "10 percent discount when buying 3 Alexa speakers ";
+        Ft.Reason=Ft.Reason + "10 percent discount when buying 3 Alexa speakers, ";
         Retract("AlexaDiscount10Percent");
 }

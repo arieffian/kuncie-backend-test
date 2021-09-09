@@ -143,7 +143,6 @@ func createTransaction(p graphql.ResolveParams) (interface{}, error) {
 	trans.Reason = f.Reason
 	trans.TransactionDetail = td
 
-	//TODO return transaction record
 	tID, err := TransactionRepo.CreateTransaction(p.Context, trans)
 	if err != nil {
 		return graphql.Interface{}, err
