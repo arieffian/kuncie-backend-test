@@ -64,34 +64,14 @@ $ migrate -database mysql://backend:backend@/backend -path ./sql up
 
 **Step 4 Calling APIs**
 
-Create Brand
-```bash
-$ curl -X POST -H 'content-type: application/json' --data '{"name": "acer"}' http://localhost:8080/brand
-``` 
-
-Get Product by ID
-```bash
-$ curl http://localhost:8080/product?id=1
-``` 
-
-Create Product
-```bash
-$ curl -X POST -H 'content-type: application/json' --data '{"brand_id": 4, "name": "predator", "qty": 3, "price": 1050}' http://localhost:8080/product
-``` 
-
-Get Product by Brand ID
-```bash
-$ curl http://localhost:8080/product/brand?id=1
-``` 
-
 Create Transaction
 ```bash
-$ curl -X POST -H 'content-type: application/json' --data '{"user_id": 1,"detail": [{"product_id": 1,"qty": 1},{"product_id": 2,"qty": 1},{"product_id": 3,"qty": 1}]}' http://localhost:8080/order
+$ curl 'http://localhost:8080' -X POST -H "Content-Type: application/json" --data '{ "query": "mutation createOrder ($transaction: orderInput!) { createOrder (order: $transaction) { id user_id grand_total discount reason detail_order { product_id sku qty sub_total } } }", "variables": { "transaction": { "user_id": 1, "items": [{ "product_id": 1, "sku": "12345", "qty": 1 }, { "product_id": 2, "sku": "33424", "qty": 1 }] } } }'
 ``` 
 
 Get Transaction by ID
 ```bash
-$ curl http://localhost:8080/order?id=1
+$ curl 'http://localhost:8080' -X POST -H "content-Type: application/json" --data '{ "query": "{ getOrder (orderID: 1) { id user_id grand_total detail_order { product_id sku qty sub_total } } }" }'
 ``` 
 
 ## Testing App
@@ -100,4 +80,3 @@ $ curl http://localhost:8080/order?id=1
 $ go test ./... -cover -vet -all -v
 ``` 
 
-curl -X POST -H 'Content-Type: application/json' -d '{"query": "query { order { id,user_id,grand_total,detail_order{product_id,sub_total} } }"}' http://localhost:8080/
